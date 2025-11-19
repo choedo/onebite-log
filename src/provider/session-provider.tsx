@@ -1,12 +1,18 @@
 import type { ReactNode } from "react";
 import React from "react";
 import supabase from "@/lib/supabase";
-import { useIsSessionLoaded, useSetSession } from "@/store/session";
+import { useIsSessionLoaded, useSession, useSetSession } from "@/store/session";
 import GlobalLoader from "@/components/global-loader";
+import { useProfileData } from "@/hooks/queries/use-profuke-data";
 
 export default function SessionProvider({ children }: { children: ReactNode }) {
+  const session = useSession();
   const setSession = useSetSession();
   const isSessionLoaded = useIsSessionLoaded();
+
+  const { data: profile, isLoading: isProfileLoading } = useProfileData(
+    session?.user.id,
+  );
 
   React.useEffect(() => {
     supabase.auth.onAuthStateChange((event, session) => {
@@ -15,6 +21,8 @@ export default function SessionProvider({ children }: { children: ReactNode }) {
   }, []);
 
   if (!isSessionLoaded) return <GlobalLoader />;
+
+  if (isProfileLoading) return <GlobalLoader />;
 
   return children;
 }
