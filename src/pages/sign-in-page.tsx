@@ -1,14 +1,38 @@
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useSignInWithPassword } from "@/hooks/mutations/use-sign-in-width-password";
-import React from "react";
+import { useSignInWithPassword } from "@/hooks/mutations/use-sign-in-with-password";
 import { Link } from "react-router";
+import { toast } from "sonner";
+
+import gitHubLogo from "@/assets/github-mark.svg";
+import { useSignInWithOAuth } from "@/hooks/mutations/use-sign-in-with-oauth";
+import { generateErrorMessage } from "@/lib/error";
 
 export default function SignInPage() {
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
 
-  const { mutate: signInWithPassword } = useSignInWithPassword();
+  const { mutate: signInWithPassword, isPending: isSignInWithPasswordPending } =
+    useSignInWithPassword({
+      onError: (error) => {
+        const message = generateErrorMessage(error);
+        toast.error(message, {
+          position: "top-center",
+        });
+
+        setPassword("");
+      },
+    });
+  const { mutate: signInWithOAuth, isPending: isSignInWithOAuthPending } =
+    useSignInWithOAuth({
+      onError: (error) => {
+        const message = generateErrorMessage(error);
+        toast.error(message, {
+          position: "top-center",
+        });
+      },
+    });
 
   const handleSignInWithPasswordClick = () => {
     if (email.trim() === "") return;
@@ -17,11 +41,18 @@ export default function SignInPage() {
     signInWithPassword({ email, password });
   };
 
+  const handleSignInWithGitHubClick = () => {
+    signInWithOAuth("github");
+  };
+
+  const isPending = isSignInWithPasswordPending || isSignInWithOAuthPending;
+
   return (
     <div className="flex flex-col gap-8">
       <div className="text-xl font-bold">로그인</div>
       <div className="flex flex-col gap-2">
         <Input
+          disabled={isPending}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           className="py-6"
@@ -29,6 +60,7 @@ export default function SignInPage() {
           placeholder="example@abc.com"
         />
         <Input
+          disabled={isPending}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           className="py-6"
@@ -36,9 +68,25 @@ export default function SignInPage() {
           placeholder="passwords"
         />
       </div>
-      <div>
-        <Button onClick={handleSignInWithPasswordClick} className="w-full">
+      <div className="flex flex-col gap-2">
+        <Button
+          disabled={isPending}
+          onClick={handleSignInWithPasswordClick}
+          className="w-full"
+        >
           로그인
+        </Button>
+        <Button
+          onClick={handleSignInWithGitHubClick}
+          className="w-full"
+          variant={"outline"}
+        >
+          <img
+            src={gitHubLogo}
+            alt={"GitHub 계정으로 로그인"}
+            className="h-4 w-4"
+          />
+          GitHub 계정으로 로그인
         </Button>
       </div>
       <div>
