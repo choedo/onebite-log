@@ -29,5 +29,7 @@ export function useInfinitePostsData() {
       if (lastPage.length < PAGE_SIZE) return undefined;
       return allPages.length;
     }, // 새로운 페이지를 불러와야할 때 다음 페이지를 계산하기 위한 옵션
+
+    staleTime: Infinity,
   });
 }
