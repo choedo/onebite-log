@@ -1,4 +1,4 @@
-import { createPost, createPostWithImages } from "@/api/post";
+import { createPostWithImages } from "@/api/post";
 import type { UseMutationCallback } from "@/types";
 import { useMutation } from "@tanstack/react-query";
 
