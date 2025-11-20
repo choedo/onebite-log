@@ -37,6 +37,35 @@ export default function PostEditorModal() {
   const textareaRef = React.useRef<HTMLTextAreaElement>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
+  /**
+   * 입력값 높이에 따라 textarea 자동 높이 설정
+   * --
+   */
+  React.useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+      textareaRef.current.style.height =
+        textareaRef.current.scrollHeight + "px";
+    }
+  }, [content]);
+
+  /**
+   * 모달 마운트 시 자동 포커스
+   * --
+   */
+  React.useEffect(() => {
+    if (!isOpen) {
+      images.forEach((image) => {
+        URL.revokeObjectURL(image.previewUrl);
+      });
+      return;
+    }
+
+    textareaRef.current?.focus();
+    setContent("");
+    setImages([]);
+  }, [isOpen]);
+
   const handleCloseModal = () => {
     if (content !== "" || images.length !== 0) {
       // AlertModal
@@ -83,31 +112,8 @@ export default function PostEditorModal() {
     setImages((prev) =>
       prev.filter((item) => item.previewUrl !== image.previewUrl),
     );
+    URL.revokeObjectURL(image.previewUrl);
   };
-
-  /**
-   * 입력값 높이에 따라 textarea 자동 높이 설정
-   * --
-   */
-  React.useEffect(() => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = "auto";
-      textareaRef.current.style.height =
-        textareaRef.current.scrollHeight + "px";
-    }
-  }, [content]);
-
-  /**
-   * 모달 마운트 시 자동 포커스
-   * --
-   */
-  React.useEffect(() => {
-    if (!isOpen) return;
-
-    textareaRef.current?.focus();
-    setContent("");
-    setImages([]);
-  }, [isOpen]);
 
   return (
     <Dialog open={isOpen} onOpenChange={handleCloseModal}>
